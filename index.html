@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hydra Sweeper</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💣</text></svg>" />
+    <script type="module" src="./src/index.ts" defer></script>
+  </head>
+  <body>
+    <div class="menu">
+      <button class="close-menu">&#10006;</button>
+      <div class="game-property">
+        <label for="depth">Expansions</label>
+        <span id="depth-controls">
+          <button class="decrement">-</button>
+          <input type="number" min="0" id="depth" />
+          <button class="increment">+</button>
+        </span>
+      </div>
+      <div class="game-property">
+        <label for="map">Map</label>
+        <select id="map"></select>
+      </div>
+      <div class="game-property">
+        <label for="seed">Seed</label>
+        <span class="split">
+          <input type="text" id="seed" />
+          <button class="randomize-seed">🎲</button>
+        </span>
+      </div>
+      <button id="new-game">New Game</button>
+    </div>
+    <section class="floating">
+      <button class="open-menu">
+        <img id="Settings" src="gear.svg" alt="gear" />
+      </button>
+      <div id="status-icon">▶️</div>
+    </section>
+    <main>
+      <canvas id="canvas"></canvas>
+      <svg id="tree-visualization" viewBox="0 0 100 100"></svg>
+    </main>
+  </body>
+</html>
+
