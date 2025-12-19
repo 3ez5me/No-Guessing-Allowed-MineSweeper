@@ -1,6 +1,6 @@
 // @ts-check
 import { MASKS } from "../board/constants.js";
-import type { Expand, Initialize } from "./types.d.ts";
+import type { Expand, Initialize } from "./types";
 
 const M = MASKS.MINE;
 // const B = MASKS.BACKGROUND;
@@ -39,6 +39,6 @@ const expand: Expand = () => {
   };
 };
 
-const test = { name: "test", init, expand };
-export default test;
+const exampleMap = { name: "example", init, expand };
+export default exampleMap;
 

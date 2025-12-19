@@ -1,8 +1,8 @@
 import dungeon from "./dungeon.ts";
-import test from "./test.ts";
+import example from "./example.ts";
 import type { Map } from "./types";
 
-const maps: Map[] = [test, dungeon];
+const maps: Map[] = [example, dungeon];
 
 export default maps;
 
