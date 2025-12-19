@@ -8,3 +8,5 @@ Controls:
 
 
 Remember: if you're stuck use the tree on the side to find a better reveal order if one exists, do not make guesses.
+
+Play it live [here](https://no-guessing-allowed-mine-sweeper.vercel.app/).
