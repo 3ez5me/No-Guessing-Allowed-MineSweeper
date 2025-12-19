@@ -1,12 +1,14 @@
 // import "./style.css";
+import { inject } from "@vercel/analytics";
 import { canvasSize, initMouseEvents, initResizeEvents } from "./canvasEvents.js";
 import Game from "./game/Game.js";
 import initGameEvents from "./game/gameEvents.js";
 import maps from "./maps/maps.js";
 import initMenu, { randomSeed } from "./menu.js";
-// import { renderBoard } from "./render.js";
 import Renderer from "./renderer/Renderer.js";
 import initHistoryTree from "./tree/historyTree.js";
+
+inject();
 
 // initialize game
 const DEFAULT_EXPANSIONS = 3;
