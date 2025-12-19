@@ -1,4 +1,4 @@
-import "./style.css";
+// import "./style.css";
 import { canvasSize, initMouseEvents, initResizeEvents } from "./canvasEvents.js";
 import Game from "./game/Game.js";
 import initGameEvents from "./game/gameEvents.js";
