@@ -7,6 +7,7 @@ import maps from "./maps/maps.js";
 import initMenu, { randomSeed } from "./menu.js";
 import Renderer from "./renderer/Renderer.js";
 import initHistoryTree from "./tree/historyTree.js";
+import initTutorial from "./tutorial.js";
 
 inject();
 
@@ -27,6 +28,9 @@ initHistoryTree(game);
 
 // Hook up restart handler
 initMenu(game);
+
+// Hook up tutorial event handlers
+initTutorial();
 
 // Initialize game events
 initGameEvents(game);

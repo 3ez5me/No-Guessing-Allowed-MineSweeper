@@ -105,6 +105,27 @@ svg {
   }
 }
 
+.tutorial {
+  position: absolute;
+  top: calc(50% - 400px);
+  left: calc(50% - 300px);
+  background-color: #c0c0c0;
+  padding: 24px;
+  width: 600px;
+  box-shadow: inset 2px 2px #fff, inset -2px -2px #808080;
+  font-family: "Pixelify Sans", serif;
+  img {
+    width: 100%;
+  }
+  .rule {
+    margin: 8px;
+    margin-bottom: 16px;
+  }
+  p {
+    margin: 6px;
+  }
+}
+
 button {
   min-width: 24px;
   min-height: 24px;
@@ -138,7 +159,8 @@ input[type="number"] {
   appearance: textfield;
 }
 
-.close-menu {
+.close-menu,
+.close-tutorial {
   /* padding: 16px; */
   font-family: monospace;
   width: 24px;

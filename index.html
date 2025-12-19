@@ -11,7 +11,7 @@
     <script type="module" src="./src/index.ts" defer></script>
   </head>
   <body>
-    <div class="menu">
+    <section class="menu">
       <button class="close-menu">&#10006;</button>
       <div class="game-property">
         <label for="depth">Expansions</label>
@@ -33,7 +33,7 @@
         </span>
       </div>
       <button id="new-game">New Game</button>
-    </div>
+    </section>
     <section class="floating">
       <button class="open-menu">
         <img id="Settings" src="gear.svg" alt="gear" />
@@ -44,6 +44,35 @@
       <canvas id="canvas"></canvas>
       <svg id="tree-visualization" viewBox="0 0 100 100"></svg>
     </main>
+    <section class="tutorial">
+      <h3>Zero-Guess Minesweeper</h3>
+
+      <div class="rule">
+        <strong>Rule #1: No Guessing Allowed</strong>
+        <p>
+          Every move must be 100% logically deducible. If you guess, a loss will be forced in the verification stage at
+          the end.
+        </p>
+      </div>
+
+      <div class="rule">
+        <strong>Stuck? Try Different Paths</strong>
+        <p><img src="stuck.png" alt="Example of being stuck - click the history tree to rewind" /></p>
+        <p>Click any node in the history tree to rewind and try a different reveal order.</p>
+      </div>
+
+      <div class="rule">
+        <strong>Continue After Rewind</strong>
+        <p>After rewinding, match your cursor position and buttons to what it was to resume playing.</p>
+      </div>
+
+      <div class="rule">
+        <strong>Unwinnable Seeds</strong>
+        <p>Some seeds have no guess-free solution. If all paths require guessing, the seed is unwinnable.</p>
+      </div>
+
+      <button class="close-tutorial">✖</button>
+    </section>
   </body>
 </html>
 

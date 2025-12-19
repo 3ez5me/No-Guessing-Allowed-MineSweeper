@@ -26,3 +26,7 @@ export const mapSelect = document.querySelector("#map") as HTMLSelectElement;
 
 export const svg = document.getElementById("tree-visualization") as HTMLElement & SVGElement;
 
+export const tutorial = document.querySelector(".tutorial") as HTMLElement;
+
+export const closeTutorial = document.querySelector(".close-tutorial") as HTMLButtonElement;
+
