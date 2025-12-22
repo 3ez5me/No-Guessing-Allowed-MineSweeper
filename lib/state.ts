@@ -35,6 +35,7 @@ export default class StateMachine {
     if (this.started) return;
     this.started = true;
     await this.emitter.emit(`${this.initialState}-enter`, this.initialState, this.initialState, ...data);
+    await this.emitter.emit(`${this.initialState}-*`, this.initialState, this.initialState, ...data);
   }
 
   async enter(state: string, ...data: any[]) {
@@ -88,13 +89,17 @@ export default class StateMachine {
   controlled(state: string, generator: (...arg0: any[]) => Generator | AsyncGenerator) {
     return this.onEnter(state, (_p, _c, ...generatorParams) => {
       const _generator = generator(...generatorParams);
+      let finished = false;
       function cleanup() {
+        if (finished) return;
+        finished = true;
         offUpdate();
         offExit();
       }
       const offUpdate = this.onUpdate(state, async () => {
         if ((await _generator.next()).done) cleanup();
       });
+
       const offExit = this.onExit(state, cleanup);
     });
   }
