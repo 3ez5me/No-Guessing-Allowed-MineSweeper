@@ -1,27 +1,25 @@
 import { delta, floor2D } from "../../lib/utils";
 import Board from "../board/Board";
-import Cursor from "../Cursor";
 import { BoardAction, isTreeNodeAction, CursorChangeAction, ToggleFlagAction } from "../history/actions";
 import HistoryNode from "../history/HistoryNode";
 import review from "./review";
 import rewind from "./rewind";
 import type { GameAction } from "../history/types";
-import type { Initialize, Expand } from "../maps/types";
 import type { Point2D } from "../../lib/utils";
+import type { GameStates } from "./types";
 import type Game from "./Game";
-
 const MAX_PAUSE = 50;
 
 export default function initGameEvents(game: Game) {
-  game.state.in("*").on("restart", (init: Initialize, expand: Expand, seed: string, depth: number) => {
+  game.state.in("*").on("restart", (init, expand, seed, depth) => {
     game.restart(init, expand, seed, depth);
     game.state.enter("playing");
   });
 
-  game.state.in("*").on("preMouseEvent", (_prev: Cursor, curr: Cursor) => {
+  game.state.in("*").on("preMouseEvent", (_prev, curr) => {
     game.cursors.primary = curr;
   });
-  game.state.in("playing").on("preMouseEvent", (prev: Cursor, curr: Cursor) => {
+  game.state.in("playing").on("preMouseEvent", (prev, curr) => {
     game.state.emit("action", new CursorChangeAction(prev, curr));
   });
 
@@ -29,7 +27,7 @@ export default function initGameEvents(game: Game) {
     if (Math.abs(game.currentTick - game.lastActionTick) < MAX_PAUSE) game.currentTick++;
   });
 
-  game.state.in("playing").on("action", (action: GameAction) => {
+  game.state.in("playing").on("action", action => {
     action.tick = game.currentTick;
     game.lastActionTick = game.currentTick;
     if (isTreeNodeAction(action)) {
@@ -41,16 +39,16 @@ export default function initGameEvents(game: Game) {
     }
   });
 
-  game.state.in("playing").on("mouseMove", (prev: Cursor, curr: Cursor) => {
+  game.state.in("playing").on("mouseMove", (prev, curr) => {
     if (curr.middle) move(game, prev, curr);
     else if (curr.left) press(game, curr);
   });
 
-  game.state.in("playing").on("wheel", (cursor: Cursor, dy: number) => {
+  game.state.in("playing").on("wheel", (cursor, dy) => {
     game.board.zoom(game.container, cursor, dy < 0);
   });
 
-  game.state.in("playing").on("leftUp", (cursor: Cursor) => {
+  game.state.in("playing").on("leftUp", cursor => {
     const board = game.board;
     const [r, c] = board.coordsToCell(cursor);
     const i = board.pairToIndex(r, c);
@@ -59,9 +57,9 @@ export default function initGameEvents(game: Game) {
     reveal(game, r, c);
   });
 
-  game.state.in("playing").on("leftDown", (cursor: Cursor) => press(game, cursor));
+  game.state.in("playing").on("leftDown", cursor => press(game, cursor));
 
-  game.state.in("playing").on("rightDown", (cursor: Cursor) => {
+  game.state.in("playing").on("rightDown", cursor => {
     const [r, c] = game.board.coordsToCell(cursor);
     if (game.board.isOutside(r, c)) return;
     if (game.isAtRoot()) return; // ignore right clicks at the beginning
@@ -76,9 +74,6 @@ export default function initGameEvents(game: Game) {
     if (cursor.left) game.board.press(r, c);
   });
 
-  game.state.controlled("reviewing", review);
-  game.state.controlled("rewinding", rewind);
-
   game.state.onEnter("releasing", attemptRelease);
   game.state.in("releasing").on("preMouseEvent", attemptRelease);
 
@@ -86,8 +81,23 @@ export default function initGameEvents(game: Game) {
     if (canUnlock(game)) game.state.enter("playing");
   }
 
-  game.state.in("playing").on("review", () => game.state.enter("reviewing", game));
-  game.state.in("playing").on("rewind", (start, end) => game.state.enter("rewinding", game, start, end));
+  game.state.in("playing").on("review", () => controlled(game, "reviewing", review(game)));
+  game.state.in("playing").on("rewind", (start, end) => controlled(game, "rewinding", rewind(game, start, end)));
+}
+
+export async function controlled(game: Game, state: GameStates, gen: Generator | AsyncGenerator) {
+  await game.state.enter(state);
+  let finished = false;
+  function cleanup() {
+    if (finished) return;
+    finished = true;
+    offUpdate();
+    offExit();
+  }
+  const offUpdate = game.state.onUpdate(state, async () => {
+    if ((await gen.next()).done) cleanup();
+  });
+  const offExit = game.state.onExit(state, cleanup);
 }
 
 function reveal(game: Game, r: number, c: number) {
@@ -102,7 +112,7 @@ function reveal(game: Game, r: number, c: number) {
   //   If `i` was a chord then `j` will be the first neighbor that can be revealed
   if (game.currNode.hasRevealAt(j)) {
     // enter rewinding
-    game.state.emit("rewind", game.currNode, game.currNode.getRevealAt(j));
+    game.state.emit("rewind", game.currNode, game.currNode.getRevealAt(j)!);
     return;
   }
 

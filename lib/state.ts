@@ -1,107 +1,124 @@
 import Emitter from "./eventEmitter";
-import type { EventHandler } from "./types";
 
-export default class StateMachine {
-  initialState: string;
-  currState: string;
-  states: Set<string>;
-  transitioning: boolean;
-  started: boolean;
-  emitter: Emitter;
-  constructor(initialState: string, states: string[]) {
-    this.initialState = initialState;
-    this.currState = initialState;
-    this.states = new Set(states);
-    this.transitioning = false;
-    this.started = false;
-    this.emitter = new Emitter();
+type BuiltInParams<TState extends string> = {
+  enter: [prevState: TState];
+  exit: [nextState: TState];
+  update: [];
+  "*": [];
+};
+
+type ResolveArgs<K, TEvents, TState extends string> = K extends keyof BuiltInParams<TState>
+  ? BuiltInParams<TState>[K]
+  : K extends keyof TEvents
+  ? TEvents[K]
+  : any[];
+
+export default class StateMachine<TEvents extends { [K in keyof TEvents]: any[] }, TState extends string> {
+  // For now: enforce type safety in StateMachine
+  // Not exactly sure how to do the string concat types properly
+  #emitter = new Emitter<Record<string, any[]>>();
+  #currState: TState;
+  #initialState: TState;
+  #states: Set<TState>;
+  #transitioning = false;
+  #started = false;
+
+  constructor(initialState: TState, states: TState[]) {
+    this.#currState = initialState;
+    this.#initialState = initialState;
+    this.#states = new Set(states);
   }
 
-  on(state: string, event: string, fn: EventHandler) {
-    if (!this.states.has(state)) throw new Error(`Invalid state: ${state}`);
-    return this.emitter.on(`${state}-${event}`, fn);
+  get currState() {
+    return this.#currState;
   }
 
-  async emit(event: string, ...data: any[]) {
-    if (!this.started) throw new Error("Machine not started - call `start` first!");
-    if (event === "enter" || event === "exit") {
-      throw new Error(`Reserved event: ${event} - use state transitions instead`);
-    }
-    await this.emitter.emit(`${this.currState}-${event}`, ...data);
-    if (event !== "*") await this.emitter.emit(`${this.currState}-*`, ...data);
+  get started() {
+    return this.#started;
   }
 
-  async start(...data: any[]) {
-    if (this.started) return;
-    this.started = true;
-    await this.emitter.emit(`${this.initialState}-enter`, this.initialState, this.initialState, ...data);
-    await this.emitter.emit(`${this.initialState}-*`, this.initialState, this.initialState, ...data);
+  get transitioning() {
+    return this.#transitioning;
   }
 
-  async enter(state: string, ...data: any[]) {
-    if (this.currState === state) return;
-    if (this.transitioning) throw new Error("State transition already in progress");
-    if (!this.states.has(state)) throw new Error(`Invalid state: ${state}`);
-    const prev = this.currState;
-    const next = state;
-    try {
-      this.transitioning = true;
-      await this.emitter.emit(`${prev}-exit`, prev, next, ...data);
-      await this.emitter.emit(`${prev}-*`, prev, next, ...data);
-      this.transitioning = false;
-      this.currState = next;
-      await this.emitter.emit(`${next}-enter`, prev, next, ...data);
-      await this.emitter.emit(`${next}-*`, prev, next, ...data);
-    } finally {
-      this.transitioning = false;
-    }
+  on<K extends (keyof TEvents | keyof BuiltInParams<TState>) & string>(
+    state: TState,
+    event: K,
+    fn: (...args: ResolveArgs<K, TEvents, TState>) => any
+  ): () => void {
+    if (!this.#states.has(state)) throw new Error(`Invalid state: ${state}`);
+    return this.#emitter.on(`${state}-${event}`, fn);
   }
 
-  onExit(state: string, fn: EventHandler) {
+  onExit(state: TState, fn: (...args: BuiltInParams<TState>["exit"]) => any) {
     return this.on(state, "exit", fn);
   }
 
-  onEnter(state: string, fn: EventHandler) {
+  onEnter(state: TState, fn: (...args: BuiltInParams<TState>["enter"]) => any) {
     return this.on(state, "enter", fn);
   }
 
-  onUpdate(state: string, fn: EventHandler) {
+  onUpdate(state: TState, fn: () => any) {
     return this.on(state, "update", fn);
   }
 
-  in(...states: string[]) {
-    if (states.includes("*")) states = [...this.states];
+  async emit<K extends keyof TEvents & string>(event: K, ...data: TEvents[K]) {
+    if (!this.#started) throw new Error("Machine not started");
+    if (event === "enter" || event === "exit") {
+      throw new Error(`Reserved event: ${event} - use state transitions instead`);
+    }
+    await this.#emitter.emit(`${this.#currState}-${event}`, ...data);
+    if (event !== "*") await this.#emitter.emit(`${this.#currState}-*`);
+  }
+
+  async enter(state: TState) {
+    if (this.#currState === state) return;
+    // Maybe just return instead of throwing on transition?
+    if (this.#transitioning) throw new Error("State transition already in progress");
+    if (!this.#states.has(state)) throw new Error(`Invalid state: ${state}`);
+
+    const prev = this.#currState;
+    const next = state;
+
+    try {
+      this.#transitioning = true;
+      await this.#emitter.emit(`${prev}-exit`, next);
+      await this.#emitter.emit(`${prev}-*`);
+
+      this.#currState = next;
+      this.#transitioning = false;
+
+      await this.#emitter.emit(`${next}-enter`, prev);
+      await this.#emitter.emit(`${next}-*`);
+    } finally {
+      this.#transitioning = false;
+    }
+  }
+
+  async start() {
+    if (this.#started) return;
+    this.#started = true;
+    await this.#emitter.emit(`${this.#initialState}-enter`, this.#initialState);
+    await this.#emitter.emit(`${this.#initialState}-*`);
+  }
+
+  in(...states: (TState | "*")[]) {
+    const resolvedStates = states.includes("*") ? Array.from(this.#states) : (states as TState[]);
+
     return {
-      on: (event: string, fn: EventHandler) => {
-        const unsubscribes = states.map(state => this.on(state, event, fn));
-        return () => {
-          for (const unsub of unsubscribes) unsub();
-        };
+      on: <K extends (keyof TEvents | keyof BuiltInParams<TState>) & string>(
+        event: K,
+        fn: (...args: ResolveArgs<K, TEvents, TState>) => any
+      ) => {
+        const unsubscribes = resolvedStates.map(state => this.on(state, event, fn));
+        return () => unsubscribes.forEach(unsub => unsub());
       },
     };
   }
-
-  async once(state: string, event: string, pred: (...params: any[]) => boolean = () => true) {
-    if (!this.states.has(state)) throw new Error(`Invalid state: ${state}`);
-    return this.emitter.once(`${state}-${event}`, pred);
-  }
-
-  controlled(state: string, generator: (...arg0: any[]) => Generator | AsyncGenerator) {
-    return this.onEnter(state, (_p, _c, ...generatorParams) => {
-      const _generator = generator(...generatorParams);
-      let finished = false;
-      function cleanup() {
-        if (finished) return;
-        finished = true;
-        offUpdate();
-        offExit();
-      }
-      const offUpdate = this.onUpdate(state, async () => {
-        if ((await _generator.next()).done) cleanup();
-      });
-
-      const offExit = this.onExit(state, cleanup);
-    });
-  }
 }
+
+// interface StateEventListener<TEvents extends { [K in keyof TEvents]: any[] }, TState extends string> {
+//   <K extends keyof TEvents>(event: K, fn: (...args: TEvents[K]) => any): () => void;
+//   <K extends keyof BuiltInParams<TState>>(event: K, fn: (...args: BuiltInParams<TState>[K]) => any): () => void;
+// }
 

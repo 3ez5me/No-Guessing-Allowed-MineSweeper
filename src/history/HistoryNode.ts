@@ -1,6 +1,6 @@
 import { pathFromRoot } from "./helpers";
 import { BoardAction, RevealAction } from "./actions";
-import type Board from "../board/Board.js";
+import type Board from "../board/Board";
 import type Cursor from "../Cursor";
 import type { SecondaryAction, TreeNode, TreeNodeAction } from "./types";
 

@@ -3,7 +3,6 @@ import Cursor from "./Cursor";
 import { canvas } from "./elements";
 import type Game from "./game/Game";
 
-/** @param {Game} game */
 export function initMouseEvents(game: Game) {
   let cursor = new Cursor(0, 0, false, false, false);
 
@@ -48,7 +47,6 @@ export function initMouseEvents(game: Game) {
   }
 }
 
-/** @param {Game} game */
 export function initResizeEvents(game: Game) {
   function handleResize() {
     const container = canvasSize();
@@ -69,7 +67,6 @@ export function canvasSize() {
   return { width, height };
 }
 
-/** @param {MouseEvent} event */
 function eventCoordinates(event: MouseEvent) {
   const bounds = canvas.getBoundingClientRect();
   const x = Math.round(((event.x - bounds.left) / bounds.width) * canvas.width);

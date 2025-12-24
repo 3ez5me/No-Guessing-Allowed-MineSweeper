@@ -10,7 +10,6 @@ const NODE_SIZE = 16;
 type SVGTreeNode = SVGCircleElement | SVGRectElement;
 type HistoryLayoutNode = LayoutNode<HistoryNode>;
 
-/** @param {Game} game */
 export default function initHistoryTree(game: Game) {
   let cursor = new Cursor(0, 0, false, false, false);
 
@@ -30,7 +29,7 @@ export default function initHistoryTree(game: Game) {
   resize();
   draw();
 
-  game.state.in("*").on("currNodeChange", (root: HistoryNode, node: HistoryNode) => {
+  game.state.in("*").on("currNodeChange", (root, node) => {
     if (!nodes.has(root)) reset();
     if (!nodes.has(node)) draw();
     setCurrentNode(node);
@@ -132,7 +131,6 @@ export default function initHistoryTree(game: Game) {
     return line;
   }
 
-  /** @param {HistoryNode} node */
   function getTreeNode(node: HistoryNode) {
     if (nodes.has(node)) return nodes.get(node)!;
     const shape = node.isReveal() ? "circle" : "rect";

@@ -2,6 +2,9 @@ import Emitter from "../../lib/eventEmitter";
 import { clamp, delta, floor2D, neighborhood } from "../../lib/utils";
 import { MASKS } from "./constants";
 import { PressReleaseAction, RevealAction, TransformAction } from "../history/actions";
+import type { GameAction } from "../history/types";
+
+type BoardEvents = { action: [action: GameAction] };
 
 const CELL_SIZE_CHANGE = 4;
 const MIN_CELL_SIZE = 16;
@@ -15,7 +18,7 @@ export default class Board {
   grid: Uint8Array<ArrayBuffer>;
   origin: [number, number];
   coveredClues: number;
-  emitter: Emitter;
+  emitter: Emitter<BoardEvents>;
   coords: { x: number; y: number };
   cellSize: number;
   pressing: { target: number; isPressing: boolean };

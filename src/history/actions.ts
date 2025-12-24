@@ -108,9 +108,7 @@ export class CursorChangeAction {
 export class RevealAction {
   tick: number;
   revealed: [number, number][];
-  /**
-   * @param {[number, number][]} revealed
-   */
+
   constructor(revealed: [number, number][]) {
     this.tick = 0;
     this.revealed = revealed;
@@ -118,13 +116,11 @@ export class RevealAction {
     // location technically is just revealed[0][0]
   }
 
-  /** @param {Game} game */
   do(game: Game) {
     game.lastActionTick = this.tick;
     for (let [i, _] of this.revealed) game.board.revealCell(i);
   }
 
-  /** @param {Game} game */
   undo(game: Game) {
     game.lastActionTick = this.tick;
     for (let [i, prevState] of this.revealed) game.board.restoreCell(i, prevState);
@@ -158,30 +154,4 @@ export class BoardAction {
     game.expansions += 1;
   }
 }
-
-// TODO: track all mouse changes
-// ButtonAction = MouseAction
-// If I want animations I have to figure out which type of action it is
-// when I gather the information
-// export class ButtonAction {
-//   /**
-//    * @param {Cursor} prev
-//    * @param {Cursor} curr
-//    */
-//   constructor(prev, curr) {
-//     this.tick = 0;
-//     this.prev = prev.clone();
-//     this.curr = curr.clone();
-//   }
-
-//   /** @param {Game} game */
-//   do(game) {
-//     game.cursor = this.curr.clone();
-//   }
-
-//   /** @param {Game} game */
-//   undo(game) {
-//     game.cursor = this.prev.clone();
-//   }
-// }
 

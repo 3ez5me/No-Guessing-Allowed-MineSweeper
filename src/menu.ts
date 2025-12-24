@@ -7,7 +7,6 @@ import type { Map } from "./maps/types";
 const CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 const defaultMaxSeedLength = 100;
 
-/** @param {Game} game  */
 export default function init(game: Game) {
   /* Open/close menu modal */
   UI.closeMenu.addEventListener("click", toggleMenu);
@@ -53,8 +52,8 @@ export default function init(game: Game) {
     releasing: "🖱️",
   };
 
-  game.state.in("*").on("enter", (_, state: keyof typeof emojis) => {
-    UI.statusIcon.innerText = emojis[state];
+  game.state.in("*").on("enter", () => {
+    UI.statusIcon.innerText = emojis[game.state.currState];
   });
 }
 

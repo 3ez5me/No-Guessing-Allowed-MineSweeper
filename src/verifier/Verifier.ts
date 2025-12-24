@@ -327,8 +327,7 @@ export default class Verifier {
     return solved;
   }
 
-  /** @returns [mines, safe] */
-  combinationsOverlap(i: number): [number, number] {
+  combinationsOverlap(i: number): [mines: number, safe: number] {
     let unsolved = 0;
     for (let j of this.neighborhood(i)) {
       if (this.isEmpty(j)) unsolved |= 1 << this.neighborToBit(i, j);
@@ -366,7 +365,6 @@ export default class Verifier {
 
   gatherRegions(initial: number[]) {
     const visited = new Set<number>();
-    /** @type {[number[], number[]][]} */
     const regions: [number[], number[]][] = [];
     for (let i of initial) {
       if (this.isInactive(i) || visited.has(i)) continue;

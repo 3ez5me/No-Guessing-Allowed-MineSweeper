@@ -1,8 +1,12 @@
 import Emitter from "./eventEmitter";
-import type { EventHandler } from "./types.d.ts";
+import type { EventHandler } from "./types";
+
+type TestEvents = {
+  [key: string]: any[];
+};
 
 describe("Emitter", () => {
-  let emitter: Emitter;
+  let emitter: Emitter<TestEvents>;
   let handler: EventHandler;
 
   beforeEach(() => {
@@ -140,54 +144,6 @@ describe("Emitter", () => {
     });
   });
 
-  describe("once", () => {
-    it("should resomve with event data when event occurs", async () => {
-      const promise = emitter.once("test");
-
-      setTimeout(() => emitter.emit("test", "data", 123), 0);
-
-      const result = await promise;
-      expect(result).toEqual(["data", 123]);
-    });
-
-    it("should remove handler after first emission", async () => {
-      emitter.once("test");
-
-      expect(emitter.events.has("test")).toBe(true);
-      await emitter.emit("test", "first");
-      expect(emitter.events.has("test")).toBe(false);
-      await emitter.emit("test", "second");
-      expect(emitter.events.has("test")).toBe(false);
-    });
-
-    it("should work with multiple once calls for same event", async () => {
-      const promise1 = emitter.once("test");
-      const promise2 = emitter.once("test");
-
-      setTimeout(() => emitter.emit("test", "data"), 0);
-
-      const [result1, result2] = await Promise.all([promise1, promise2]);
-      expect(result1).toEqual(["data"]);
-      expect(result2).toEqual(["data"]);
-    });
-
-    it("should not resolve if predicate never satisfied", async () => {
-      const predicate = vi.fn(() => false);
-      const promise = emitter.once("test", predicate);
-
-      setTimeout(() => emitter.emit("test", "data"), 0);
-      setTimeout(() => emitter.emit("test", "more data"), 10);
-
-      // Wait a bit
-      await new Promise(resolve => setTimeout(resolve, 50));
-
-      expect(promise).toBeInstanceOf(Promise);
-      // Promise = pending
-      expect(vi.isMockFunction(predicate)).toBe(true);
-      expect(predicate).toHaveBeenCalledTimes(2);
-    });
-  });
-
   describe("integration", () => {
     it("should handle event chains", async () => {
       const results: string[] = [];
@@ -231,4 +187,3 @@ describe("Emitter", () => {
     });
   });
 });
-

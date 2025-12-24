@@ -1,4 +1,4 @@
-import { MASKS } from "../board/constants.js";
+import { MASKS } from "../board/constants";
 import type { Expand, Initialize } from "./types.d.ts";
 
 const M = MASKS.MINE;
@@ -15,7 +15,6 @@ const CENTER = Math.floor(ROOM_SIZE / 2);
 // medium - 16x16 tile grid with 40 mines (density = 15.625%)
 // hard   - 16x30 tile grid with 99 mines (density = 20.625%)
 
-/** @param {string} seed */
 function freeEntropy(seed: string) {
   let p = 911; // for you, not for me
   for (let i = 0; i < seed.length; i++) p = (p * 31) ^ seed.charCodeAt(i);

@@ -1,13 +1,13 @@
 // import "./style.css";
 import { inject } from "@vercel/analytics";
-import { canvasSize, initMouseEvents, initResizeEvents } from "./canvasEvents.js";
-import Game from "./game/Game.js";
-import initGameEvents from "./game/gameEvents.js";
-import maps from "./maps/maps.js";
-import initMenu, { randomSeed } from "./menu.js";
-import Renderer from "./renderer/Renderer.js";
-import initHistoryTree from "./tree/historyTree.js";
-import initTutorial from "./tutorial.js";
+import { canvasSize, initMouseEvents, initResizeEvents } from "./canvasEvents";
+import Game from "./game/Game";
+import initGameEvents from "./game/gameEvents";
+import maps from "./maps/maps";
+import initMenu, { randomSeed } from "./menu";
+import Renderer from "./renderer/Renderer";
+import initHistoryTree from "./tree/historyTree";
+import initTutorial from "./tutorial";
 
 inject();
 

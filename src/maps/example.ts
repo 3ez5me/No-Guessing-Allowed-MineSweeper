@@ -1,5 +1,5 @@
 // @ts-check
-import { MASKS } from "../board/constants.js";
+import { MASKS } from "../board/constants";
 import type { Expand, Initialize } from "./types";
 
 const M = MASKS.MINE;

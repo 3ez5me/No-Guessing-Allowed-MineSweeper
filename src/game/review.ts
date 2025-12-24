@@ -4,7 +4,6 @@ import type HistoryNode from "../history/HistoryNode";
 import Verifier from "../verifier/Verifier";
 import type Game from "./Game";
 
-/** @param {Game} game */
 export default function* review(game: Game) {
   const end = game.currNode;
   const start = game.root;
@@ -50,7 +49,6 @@ function* reviewGame(game: Game, down: HistoryNode[]) {
     if (treeNode.isReveal()) {
       const isGuaranteed = yield* verifyAction(game, verifier, treeNode.action);
       if (!isGuaranteed) return false;
-      /** @type {[number, number][]} */
       const revealed: [number, number][] = treeNode.action.revealed.map(([i]) => [i, game.board.value(i)]);
       verifier.update(revealed, []);
     }

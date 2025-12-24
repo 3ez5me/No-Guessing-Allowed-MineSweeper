@@ -12,28 +12,25 @@ export default class Renderer {
   counter: number;
   revealOrder: [number, number][];
   verifier: Verifier | null;
-  /** @param {Game} game */
   constructor(game: Game) {
     this.game = game;
-    /** @type {} */
     this.revealOrder = [];
     this.counter = 0; // just a counter for the circle pulse
 
-    /** @type {Verifier | null} */
     this.verifier = null;
 
-    game.state.in("*").on("hover", (node: HistoryNode) => {
+    game.state.in("*").on("hover", node => {
       this.revealOrder = node.revealOrder();
     });
-    game.state.in("*").on("hoverStop", _ => {
+    game.state.in("*").on("hoverStop", () => {
       this.revealOrder = [];
     });
-    game.state.in("*").on("restart", _ => {
+    game.state.in("*").on("restart", () => {
       this.revealOrder = [];
       this.verifier = null;
     });
 
-    game.state.in("reviewing").on("loadVerifier", (verifier: Verifier) => {
+    game.state.in("reviewing").on("loadVerifier", verifier => {
       this.verifier = verifier;
     });
 
@@ -124,7 +121,6 @@ export default class Renderer {
     canvas.className = "cursor-" + sprite;
   }
 
-  /** @param {Cursor} cursor  */
   getCursorSprite(cursor: Cursor): keyof typeof sprites {
     const { left, right, middle } = cursor;
     let sprite = "";
@@ -153,7 +149,6 @@ export default class Renderer {
     context.fillStyle = arrowColor;
     context.lineWidth = Math.max(1, cellSize / 20);
 
-    /** @type {Point2D[]} */
     const path: Point2D[] = this.revealOrder.map(([r, c]) => add2D(board.cellToCoords(or + r, oc + c), dCenter));
 
     context.beginPath();
@@ -194,7 +189,6 @@ export default class Renderer {
     context.fill();
   }
 
-  /** @param {number} i  */
   getSpriteOffset(i: number) {
     const game = this.game;
     const gameState = game.state.currState;

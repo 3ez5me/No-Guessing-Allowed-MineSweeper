@@ -25,10 +25,6 @@ export default function* rewind(game: Game, start: HistoryNode, end: HistoryNode
   // end.cursor === game.currNode.cursor === secondary.cursor
 }
 
-/**
- * @param {Game} game
- * @param {HistoryNode[]} up
- */
 function* walkUp(game: Game, up: HistoryNode[]) {
   for (let i = up.length - 1; i >= 0; i--) {
     const treeNode = up[i];
@@ -55,10 +51,6 @@ function* walkUp(game: Game, up: HistoryNode[]) {
   // Walk up to LCA, but don't do/undo its action
 }
 
-/**
- * @param { Game } game
- * @param { HistoryNode[] } down
- */
 function* walkDown(game: Game, down: HistoryNode[]) {
   for (let i = 0; i < down.length; i++) {
     const treeNode = down[i];
@@ -82,7 +74,6 @@ function* walkDown(game: Game, down: HistoryNode[]) {
   }
 }
 
-/** @param { Game } game */
 function* clearPending(game: Game) {
   const pending = game.pendingActions;
 
@@ -96,7 +87,6 @@ function* clearPending(game: Game) {
   }
 }
 
-/** @param { Game } game */
 function restoreProgress(game: Game) {
   while (game.board.isSolved() && game.currNode.isFinal()) {
     // (game.currNode.isFinal() && game.board.isSolved()) => game.currNode.children[0].action is BoardAction:

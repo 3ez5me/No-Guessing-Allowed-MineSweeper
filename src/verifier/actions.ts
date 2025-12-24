@@ -8,7 +8,6 @@ export class UpdateCellAction {
     this.prev = prevState;
   }
 
-  /** @param {Verifier} verifier */
   undo(verifier: Verifier) {
     const i = this.i;
     verifier.failures[i]++;

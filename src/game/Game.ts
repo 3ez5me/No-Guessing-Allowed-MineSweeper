@@ -1,14 +1,15 @@
-import StateMachine from "../../lib/state";
+import StateMachine from "../../lib/state.ts";
 import Board from "../board/Board";
 import HistoryNode from "../history/HistoryNode";
 import { BoardAction } from "../history/actions";
 import Cursor from "../Cursor";
 import type { Initialize, Expand } from "../maps/types";
 import type { GameAction, SecondaryAction } from "../history/types";
+import type { GameEvents, GameStates } from "./types.d.ts";
 
 export default class Game {
   #currNode;
-  state: StateMachine;
+  state: StateMachine<GameEvents, GameStates>;
   container: { width: number; height: number };
   seed: string;
   expansions: number;
@@ -45,7 +46,7 @@ export default class Game {
     const { board, origin } = this.init(seed);
     this.board = new Board(board, origin);
     this.board.center(this.container);
-    this.board.emitter.on("action", (/** @type {GameAction}*/ action: GameAction) => this.state.emit("action", action));
+    this.board.emitter.on("action", (action: GameAction) => this.state.emit("action", action));
 
     // history
     this.root = new HistoryNode(this.cursors.primary, new BoardAction(null, this.board));
@@ -54,7 +55,6 @@ export default class Game {
     this.lastActionTick = 0;
     this.currentTick = 0;
 
-    /** @type {SecondaryAction[]} */
     this.pendingActions = [];
   }
 
@@ -67,7 +67,7 @@ export default class Game {
     const { board, origin } = this.init(seed);
     this.board = new Board(board, origin);
     this.board.center(this.container);
-    this.board.emitter.on("action", (/** @type {GameAction}*/ action: GameAction) => this.state.emit("action", action));
+    this.board.emitter.on("action", action => this.state.emit("action", action));
 
     // history
     this.root = new HistoryNode(this.cursors.primary, new BoardAction(null, this.board));
@@ -76,7 +76,6 @@ export default class Game {
     this.lastActionTick = 0;
     this.currentTick = 0;
 
-    /** @type {SecondaryAction[]} */
     this.pendingActions = [];
   }
 
@@ -96,14 +95,4 @@ export default class Game {
     return this.#currNode;
   }
 }
-
-// Might have to change the emitter to not be async as it could add actions at wrong times
-
-// I am cloning a lot of cursors
-
-// Maybe check if node already exists in children of current node
-// Only redraw if it doesn't, highlight if it does
-// this.emit("currNodeChange", root, currNode);
-// re-draw tree if need be
-// change active node
 
