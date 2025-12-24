@@ -4,7 +4,6 @@ import sprites from "./sprites";
 import { delta, type Point2D } from "../../lib/utils";
 import type Cursor from "../Cursor";
 import type Game from "../game/Game";
-import type HistoryNode from "../history/HistoryNode";
 import type Verifier from "../verifier/Verifier";
 
 export default class Renderer {

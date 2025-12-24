@@ -1,4 +1,3 @@
-// @ts-check
 import { MASKS } from "../board/constants";
 import type { Expand, Initialize } from "./types";
 

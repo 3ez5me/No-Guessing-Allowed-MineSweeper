@@ -1,4 +1,3 @@
-// @ts-check
 const c8_0 = Uint8Array.from([0b00000000]);
 
 const c8_1 = Uint8Array.from([

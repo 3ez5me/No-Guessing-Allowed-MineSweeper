@@ -1,4 +1,3 @@
-// @ts-check
 /*  
   Board Cell:
   Symbol | Meaning           | Bit
