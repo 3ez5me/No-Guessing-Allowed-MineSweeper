@@ -15,6 +15,21 @@ const CENTER = Math.floor(ROOM_SIZE / 2);
 // medium - 16x16 tile grid with 40 mines (density = 15.625%)
 // hard   - 16x30 tile grid with 99 mines (density = 20.625%)
 
+const doors = [
+  [0, CENTER], // top
+  [0, CENTER - 1],
+  [0, CENTER + 1],
+  [CENTER, ROOM_SIZE - 1], // right
+  [CENTER - 1, ROOM_SIZE - 1],
+  [CENTER + 1, ROOM_SIZE - 1],
+  [ROOM_SIZE - 1, CENTER], // bottom
+  [ROOM_SIZE - 1, CENTER - 1],
+  [ROOM_SIZE - 1, CENTER + 1],
+  [CENTER, 0], // left
+  [CENTER - 1, 0],
+  [CENTER + 1, 0],
+];
+
 function freeEntropy(seed: string) {
   let p = 911; // for you, not for me
   for (let i = 0; i < seed.length; i++) p = (p * 31) ^ seed.charCodeAt(i);
@@ -45,10 +60,9 @@ const init: Initialize = seed => {
     }
   }
 
-  board[0][CENTER] = 0;
-  board[CENTER][0] = 0;
-  board[board.length - 1][CENTER] = 0;
-  board[CENTER][board[0].length - 1] = 0;
+  for (let door of doors) {
+    board[door[0]][door[1]] = 0;
+  }
   return {
     board,
     origin: [CENTER, CENTER],
@@ -74,12 +88,6 @@ const expand: Expand = (seed, history) => {
   const lastRoom = lastReveal.map(d => Math.floor(d / ROOM_SIZE));
   const lastRevealLocal = lastReveal.map(d => d % ROOM_SIZE);
 
-  const doors = [
-    [0, CENTER], // top
-    [CENTER, ROOM_SIZE - 1], // right
-    [ROOM_SIZE - 1, CENTER], // bottom
-    [CENTER, 0], // left
-  ];
   const travelDir = [
     [-1, 0],
     [0, 1],
@@ -93,7 +101,7 @@ const expand: Expand = (seed, history) => {
     const d1 = Math.hypot(lastRevealLocal[0] - bestDoor[0], lastRevealLocal[1] - bestDoor[1]);
     const d2 = Math.hypot(lastRevealLocal[0] - door[0], lastRevealLocal[1] - door[1]);
     if (d2 < d1) {
-      best = travelDir[i];
+      best = travelDir[Math.floor(i / 3)]; // 3 cells per door
       bestDoor = door;
     }
   }
