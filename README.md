@@ -9,4 +9,7 @@ Controls:
 
 Remember: if you're stuck use the tree on the side to find a better reveal order if one exists, do not make guesses.
 
+Setup: `pnpm i` and `pnpm run dev`
+
+
 Play it live [here](https://no-guessing-allowed-mine-sweeper.vercel.app/).
