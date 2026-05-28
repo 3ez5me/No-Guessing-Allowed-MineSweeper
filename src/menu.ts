@@ -16,11 +16,11 @@ export default function init(game: Game) {
   /* Increment/decrement maximum depth */
   UI.incrementButton.addEventListener(
     "click",
-    () => (UI.depthInput.value = `${Math.max(0, +UI.depthInput.value + 1)}`)
+    () => (UI.depthInput.value = `${Math.max(0, +UI.depthInput.value + 1)}`),
   );
   UI.decrementButton.addEventListener(
     "click",
-    () => (UI.depthInput.value = `${Math.max(0, +UI.depthInput.value - 1)}`)
+    () => (UI.depthInput.value = `${Math.max(0, +UI.depthInput.value - 1)}`),
   );
 
   /* Randomize seed */
@@ -75,6 +75,6 @@ function toggleMenu() {
   }
 }
 
-/** random seed of length `0...length` @param {number} length */
-export const randomSeed = (length: number) => randomString(CHARS, randomInt(length));
+/** random seed of length `1...length` @param {number} length */
+export const randomSeed = (length: number) => randomString(CHARS, 1 + randomInt(length - 1));
 
