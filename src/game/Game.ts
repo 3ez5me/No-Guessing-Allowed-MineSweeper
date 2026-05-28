@@ -27,7 +27,7 @@ export default class Game {
     expand: Expand,
     seed: string,
     depth: number,
-    container: { width: number; height: number }
+    container: { width: number; height: number },
   ) {
     this.state = new StateMachine("playing", ["playing", "win", "loss", "rewinding", "reviewing", "releasing"]);
     this.container = container;
@@ -44,6 +44,7 @@ export default class Game {
       secondary: new Cursor(0, 0, false, false, false),
     };
     const { board, origin } = this.init(seed);
+
     this.board = new Board(board, origin);
     this.board.center(this.container);
     this.board.emitter.on("action", (action: GameAction) => this.state.emit("action", action));
@@ -65,7 +66,9 @@ export default class Game {
     this.expansions = depth;
 
     const { board, origin } = this.init(seed);
+    const cellSize = this.board.cellSize;
     this.board = new Board(board, origin);
+    this.board.cellSize = cellSize;
     this.board.center(this.container);
     this.board.emitter.on("action", action => this.state.emit("action", action));
 
