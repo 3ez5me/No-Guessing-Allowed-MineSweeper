@@ -26,13 +26,13 @@ export default class Game {
     init: Initialize,
     expand: Expand,
     seed: string,
-    depth: number,
+    expansions: number,
     container: { width: number; height: number },
   ) {
     this.state = new StateMachine("playing", ["playing", "win", "loss", "rewinding", "reviewing", "releasing"]);
     this.container = container;
     this.seed = seed;
-    this.expansions = depth;
+    this.expansions = expansions;
 
     this.init = init;
     this.expand = expand;
@@ -59,11 +59,11 @@ export default class Game {
     this.pendingActions = [];
   }
 
-  restart(init: Initialize, expand: Expand, seed: string, depth: number) {
+  restart(init: Initialize, expand: Expand, seed: string, expansions: number) {
     this.init = init;
     this.expand = expand;
     this.seed = seed;
-    this.expansions = depth;
+    this.expansions = expansions;
 
     const { board, origin } = this.init(seed);
     const cellSize = this.board.cellSize;

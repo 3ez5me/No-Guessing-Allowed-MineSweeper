@@ -1,7 +1,9 @@
 # No Guessing Allowed Minesweeper
 
-A Minesweeper variant where **guesses are detected and punished**. The game records your entire solution path and uses a
-sophisticated constraint-satisfaction verifier to rewind and validate that you never made an unjustifiable move.
+The game records your entire solution path, then uses a constraint-satisfaction **verifier** to replay your moves and
+confirm that every reveal was **mathematically guaranteed safe** given the information available at the time.
+
+Okay, on the technical side it's more of an advanced real-time non-blocking non-deterministic replay system
 
 ## 🏆 Play Online
 
@@ -33,9 +35,36 @@ read the source code for the map generator and try to give it a reveal order tha
 ### Game Loop & State Machine
 
 - **`Game.ts`** - Core game state container managing board, history, and cursors
-- **`StateMachine`** (lib) - Event-driven state management: `playing` → `reviewing` → `win/loss`
+- **`StateMachine`** - Event-driven state management: `playing` → `reviewing` → `win/loss`
 - **`gameEvents.ts`** - Event handlers for user actions and state transitions
 - **`Cursor.ts`** - Tracks primary (player) and secondary (replay) cursors with button states
+
+```mermaid
+stateDiagram-v2
+  [*] --> playing : (init, expand, seed, expansions)
+  * --> playing : restart
+
+  playing --> rewinding : Player clicks history node
+  playing --> reviewing : k-th level solved
+  playing --> loss : Reveal mine
+  rewinding --> playing
+
+  state isGuaranteedSafe <<choice>>
+  reviewing --> isGuaranteedSafe
+  isGuaranteedSafe --> loss : At least 1 reveal could've been a mine
+  isGuaranteedSafe --> win : All reveals were correctly deduced
+
+
+
+  state rewinding {
+    [*] --> releasing : Rewind generator traverses the tree
+    releasing --> [*] : Player returns cursor state to what it was
+  }
+
+
+```
+
+The `*` means any state / wildcard
 
 ### Board & Cell Encoding
 
@@ -51,23 +80,23 @@ read the source code for the map generator and try to give it a reveal order tha
 
 ### History & Rewinding
 
-- **`HistoryNode.ts`** - Tree node representing a single reveal action
-  - Stores cursor state, revealed cells, and edge actions (flags, pans, zooms)
-  - Children represent branching alternative reveals
+- **`HistoryNode.ts`** - Tree node representing a single reveal or board
+  - Stores cursor state, revealed cells, and edge actions (flags, pans, zooms) that lead up to it from the previous node
+  - Children represent branching alternative reveals or board
 - **`actions.ts`** - Action types:
   - `RevealAction` - Core game action (multiple cells revealed in cascade)
   - `BoardAction` - Board expansion after solving current depth
   - Secondary actions: `ToggleFlagAction`, `PressReleaseAction`, `TransformAction`
 - **`rewind.ts`** - Generator-based smooth rewind animation
   - Finds lowest common ancestor between current and target node
-  - Undoes/redoes actions frame-by-frame with `game.currentTick`
+  - Undoes/redoes actions frame-by-frame by looking at the current game tick
   - Handles pending actions and board state restoration
 
 ### Constraint Solver & Verifier
 
 - **`Verifier.ts`** - Constraint satisfaction engine using constraint propagation + backtracking
   - **Key data structures**:
-    - `combinations[i]` - All valid mine patterns for 8 neighbors (C(8,k) combos)
+    - `combinations[i]` - All valid mine patterns for 8 neighbors (`C(8,k)` combos)
     - `mineCounts[i]` / `safeCounts[i]` - How many combos have mine/safe at each covered cell
     - `failures[i]` - Heuristic for picking candidates (higher = more restricted)
   - **Algorithm**:
@@ -75,8 +104,8 @@ read the source code for the map generator and try to give it a reveal order tha
     2. **Pairs propagation**: Compare overlapping constraint sets between nearby clues
     3. **Backtracking search**: When stuck, try both mine/safe, recursively verify consistency
     4. **Adaptive sampling**: Random order with frequency decay to avoid thrashing
-- **`combinations.ts`** - Pre-computed all C(8,k) combinations as 8-bit masks
-- **`pairs.ts`** - Deque for efficient pair propagation queue
+- **`combinations.ts`** - Pre-computed all `C(8,k)` combinations as 8-bit masks
+- **`pairs.ts`** - Deque for efficient pairwise constraint propagation
 - **`helpers.ts`** - Bit manipulation for neighbor indexing
 
 ### Rendering & UI
@@ -96,7 +125,7 @@ read the source code for the map generator and try to give it a reveal order tha
 - **`Expand`** - Generates next board layer based on reveal history
 - **Example map** - Small 7×7 board with static expansions
 - **Dungeon map** - Procedural dungeon-like expansion with rooms and corridors
-  - Uses seeded PRNG (`freeEntropy`) for deterministic generation
+  - Uses seeded PRNG (`freeEntropy`) for deterministic generation so that same seed + same reveal order = same expansion
   - Expands towards most recent reveal for exploratory gameplay
 
 ## 🧠 Key Algorithms
@@ -159,8 +188,8 @@ return WIN (clean solve)
 ## 🚀 Performance Optimizations
 
 - **Bit-packed cells**: 8 cells per 64 bits, cache-friendly
-- **Pre-computed combinations**: C(8,0) through C(8,8) = 256 combos total
-- **Lazy verification**: Only verify when you move, not continuously
+- **Pre-computed combinations**: `C(8,0)` through `C(8,8) = 256` combos total
+- **Lazy verification**: Only verify reveal attempts at endgame, not continuously
 - **Generator-based rewind**: Smooth animation without blocking UI
 - **Heuristic-guided search**: `failures` array reduces backtracking depth
 - **Pair filtering**: Eliminates combos early rather than full SAT solver
@@ -176,7 +205,7 @@ type Expand = (seed: string, history: RevealHistory[]) => { board: number[][]; o
 
 - **Initialize**: Generate starting board from seed
 - **Expand**: Generate next layer based on _entire history_ (enables deterministic procedural generation)
-- **Origin**: Starting cell (always unrevealed, flood-fills entire connected empty region)
+- **Origin**: Starting cell (always safe and unrevealed, flood-fills entire connected empty region)
 
 ## 🎓 Advanced Concepts
 
@@ -184,35 +213,11 @@ type Expand = (seed: string, history: RevealHistory[]) => { board: number[][]; o
 
 The history tree naturally branches when you try different reveal orders.
 
-### Reveal Order Sensitivity
-
-- Different reveal orders can expose new cells differently
-- Later reveals constrain earlier ones retroactively (e.g., a new clue might contradict a previous deduction)
-- This is why rewinding and retrying is powerful
-
 ### Why Zero-Guess is Hard
 
-- Most random boards have _some_ guess-free solution
+- Most random boards have _some_ guess-free solution to the k-th level
 - Finding it requires optimal move ordering
 - If all paths require guessing → seed is unwinnable
-
-## 🔗 Data Flow
-
-```
-User Input → Cursor/Board Events → History Node (+ pending actions)
-                                    ↓
-                            Tree Navigation (SVG)
-                                    ↓
-                            Rewind Generator (smooth animation)
-                                    ↓
-                            Board State + Game State
-                                    ↓
-                            Renderer (canvas + SVG)
-                                    ↓
-                            Display
-
-[End Game] → Review Mode → Rewind to Start → Verify Each Move → Verifier (backtracking)
-```
 
 ## 🧪 Testing
 
@@ -224,7 +229,6 @@ Tests cover:
 
 - State machine transitions and event emission
 - Event emitter subscription/unsubscription
-- Tree layout (Reingold-Tilford algorithm)
 
 ---
 
