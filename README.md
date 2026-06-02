@@ -9,6 +9,16 @@ Okay, on the technical side it's more of an advanced real-time non-blocking non-
 
 [No Guessing Allowed - Minesweeper](https://no-guessing-allowed-mine-sweeper.vercel.app/)
 
+
+## Demo
+
+
+https://github.com/user-attachments/assets/055b04db-3a5b-43ec-943d-5772dc157de8
+
+
+
+
+
 ## 📦 Setup
 
 ```bash
