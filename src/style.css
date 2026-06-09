@@ -35,19 +35,23 @@ svg {
   /* position: absolute; */
   /* right: 0px; */
   /* top: 0px; */
-  background-color: white;
+  background-color: #0f0f0f;
+  border-left: 2px dashed #fff;
 
   line,
   polyline {
     stroke-width: 2;
-    stroke: rgb(41, 41, 41);
+    /* stroke: rgb(41, 41, 41); */
+    stroke: #fff;
     pointer-events: none;
     fill: none;
   }
 
   rect,
   circle {
-    fill: rgb(41, 41, 41);
+    /* fill: rgb(41, 41, 41); */
+    fill: #fff;
+
     /* stroke: rgba(149, 145, 145, 0.54); */
     /* Invisible extra-large stroke for easier clicking */
     stroke: transparent;
@@ -65,15 +69,17 @@ svg {
   }
 
   .current {
-    stroke: rgb(41, 41, 41);
-    fill: rgb(247, 255, 0);
+    /* stroke: rgb(41, 41, 41); */
+    stroke: #fff;
+    fill: rgb(228, 39, 54);
     stroke-width: 4;
   }
 
   rect:hover,
   circle:hover {
     cursor: pointer;
-    fill: rgb(94, 94, 94);
+    /* fill: rgb(94, 94, 94); */
+    fill: rgb(190, 190, 190);
   }
 }
 
