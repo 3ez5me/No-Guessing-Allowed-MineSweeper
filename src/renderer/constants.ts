@@ -1,5 +1,6 @@
 export const SPRITE_SIZE = 64;
-export const BACKGROUND_COLOR = "#0D0D0D";
+// export const BACKGROUND_COLOR = "#0D0D0D";
+export const BACKGROUND_COLOR = "#0f0f0f";
 
 // prettier-ignore
 export const SPRITE_INDICES = Object.freeze({

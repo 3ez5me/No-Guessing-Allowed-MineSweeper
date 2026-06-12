@@ -11,6 +11,7 @@ canvas {
   width: 75vw;
   height: 100vh;
   object-fit: none;
+  background-color: #0f0f0f;
 }
 
 /* Main */
