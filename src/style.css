@@ -139,7 +139,7 @@ svg {
 }
 
 .tutorial-content {
-  overflow-y: scroll;
+  overflow-y: auto;
   max-height: 900px;
   height: min(90vh, 900px);
 }
